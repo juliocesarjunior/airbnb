@@ -1,5 +1,5 @@
 import Colors from '@/constants/Colors';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 export const defaultStyles = StyleSheet.create({
   container: {
@@ -32,7 +32,7 @@ export const defaultStyles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    height: 100,
+    height: Platform.OS === 'android' ? 80 : 100,
     bottom: 0,
     left: 0,
     right: 0,
