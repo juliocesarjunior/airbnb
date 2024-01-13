@@ -8,14 +8,23 @@ import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 
 interface Props {
   listings: any[];
-  //refresh: number;
+  refresh: number;
   category: string;
 }
 
-const Listings = ({ listings: items, category }: Props) => {
+const Listings = ({ listings: items, refresh,   category }: Props) => {
   const listRef = useRef<FlatList>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (refresh) {
+      scrollListTop();
+    }
+  }, [refresh]);
+
+  const scrollListTop = () => {
+    listRef.current?.scrollToOffset({  animated: true });
+  };
 
   useEffect(() => {
     //console.log(category)
@@ -43,8 +52,8 @@ const Listings = ({ listings: items, category }: Props) => {
           </View>
           <Text style={{ fontFamily: 'mon' }}>{item.room_type}</Text>
           <View style={{ flexDirection: 'row', gap: 4 }}>
-            <Text style={{ fontFamily: 'mon-sb' }}>€ {item.price}</Text>
-            <Text style={{ fontFamily: 'mon' }}>night</Text>
+            <Text style={{ fontFamily: 'mon-sb' }}>R$ {item.price}</Text>
+            <Text style={{ fontFamily: 'mon' }}>Noite</Text>
           </View>
         </Animated.View>
       </TouchableOpacity>

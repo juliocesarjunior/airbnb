@@ -5,12 +5,13 @@ import ExploreHeader from '@/components/ExploreHeader';
 import Listings from '@/components/Listings';
 import listingsData from '@/assets/data/airbnb-listings.json';
 //import ListingsBottomSheet from '@/components/ListingsBottomSheet';
-//import ListingsMap from '@/components/ListingsMap';
-//import listingsDataGeo from '@/assets/data/airbnb-listings.geo.json';
+import ListingsMap from '@/components/ListingsMap';
+import listingsDataGeo from '@/assets/data/airbnb-listings.geo.json';
+import ListingsBottomSheet from '@/components/ListingsBottomSheet';
 
 const Page = () => {
   const items = useMemo(() => listingsData as any, []);
-  //const getoItems = useMemo(() => listingsDataGeo, []);
+  const getoItems = useMemo(() => listingsDataGeo, []);
   const [category, setCategory] = useState<string>('Casas Pequenas');
 
   const onDataChanged = (category: string) => {
@@ -24,10 +25,13 @@ const Page = () => {
           header: () => <ExploreHeader onCategoryChanged={onDataChanged} />,
         }}
       />
+      
+      <ListingsMap listings={getoItems} />
+      <ListingsBottomSheet listings={items} category={category} />
+      {/*
       <Listings listings={items} category={category} />
-      {/* Define pour custom header 
-      /*<ListingsMap listings={getoItems} />
-      <ListingsBottomSheet listings={items} category={category} />*/}
+      /*
+     */}
     </View>
   )
 }

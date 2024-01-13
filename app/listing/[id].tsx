@@ -1,28 +1,93 @@
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image } from 'react-native';
-import React from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Share } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 import listingsData from '@/assets/data/airbnb-listings.json';
 import Colors from '@/constants/Colors';
-import Animated, { SlideInDown } from 'react-native-reanimated';
+import Animated, { interpolate, SlideInDown, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { defaultStyles } from '@/constants/Styles';
 
 const { width } = Dimensions.get('window');
 const IMG_HEIGHT = 300;
 
-const Page = () =>{
-    const { id } = useLocalSearchParams<{id: string}>();
-    const listing = (listingsData as any[]).find((item) => item.id === id);
+const Page = () => {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const listing = (listingsData as any[]).find((item) => item.id === id);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const scrollOffset = useScrollViewOffset(scrollRef);
+  const navigation = useNavigation();
 
-  return(
+  //Animação na imagem
+  const imageAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            scrollOffset.value,
+            [-IMG_HEIGHT, 0, IMG_HEIGHT, IMG_HEIGHT],
+            [-IMG_HEIGHT / 2, 0, IMG_HEIGHT * 0.75]
+          ),
+        },
+        {
+          scale: interpolate(scrollOffset.value, [-IMG_HEIGHT, 0, IMG_HEIGHT], [2, 1, 1]),
+        },
+      ],
+    };
+  });
+
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(scrollOffset.value, [0, IMG_HEIGHT / 1.5], [0, 1]),
+    };
+  }, []);
+
+  //Função para compartilhar
+  const shareListing = async () => {
+    try {
+      await Share.share({
+        title: listing.name,
+        url: listing.listing_url,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: '',
+      headerTransparent: true,
+
+      headerBackground: () => (
+        <Animated.View style={[headerAnimatedStyle, styles.header]}></Animated.View>
+      ),
+      headerRight: () => (
+        <View style={styles.bar}>
+          <TouchableOpacity style={styles.roundButton} onPress={shareListing}>
+            <Ionicons name="share-outline" size={22} color={'#000'} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.roundButton}>
+            <Ionicons name="heart-outline" size={22} color={'#000'} />
+          </TouchableOpacity>
+        </View>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity style={styles.roundButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color={'#000'} />
+        </TouchableOpacity>
+      ),
+    });
+  }, []);
+  
+  return (
     <View style={styles.container}>
       <Animated.ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
-        //ref={scrollRef}
+        ref={scrollRef}
         scrollEventThrottle={16}>
         <Animated.Image
           source={{ uri: listing.xl_picture_url }}
-          style={[styles.image]}
+          style={[styles.image, imageAnimatedStyle]}
           resizeMode="cover"
         />
 
